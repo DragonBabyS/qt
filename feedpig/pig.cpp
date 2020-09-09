@@ -15,6 +15,10 @@ pig::pig(double init_weight,int init_kind,int init_price,int init_pighouse){
     this->num=-1;  //设为-1
     this->pighouse=init_pighouse;
     this->existTime=0;
+    this->isill=0;
+}
+void pig::setisill(bool x){
+    this->isill=x;
 }
 void pig::setkind(int x){
     this->kind=x;
@@ -54,6 +58,9 @@ int pig::getnum(){
 }
 int pig::getpighouse(){
         return pighouse;
+}
+bool pig::getisill(){
+    return isill;
 }
 void pig::show(){
     qDebug()<<kind<<"       "<<weight<<"       "<<price <<"       "

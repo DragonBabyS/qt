@@ -12,10 +12,12 @@ class pig : public QObject
     int existTime;
     int num;//猪在猪圈里的编号
     int pighouse;
+    bool isill;//记录是否感染猪瘟
 public:
-   // explicit pig(QObject *parent = nullptr);
+    explicit pig(QObject *parent = nullptr);
     pig();
     pig(double init_weight,int init_kind,int init_price,int init_pighouse);//构造函数
+    void setisill(bool x);
     void weightgrow();
     void  setkind(int x);
     void setweight(double x);
@@ -28,6 +30,7 @@ public:
     int getexistTime();
     int getnum();
     int getpighouse();
+    bool getisill();
     void show();
 signals:
 
