@@ -1,0 +1,92 @@
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
+
+#include <QMainWindow>
+#include <QLabel>
+#include "logic.h"
+#include "mylabel.h"
+#include <QWidget>
+#include <QPainter>
+namespace Ui {
+class MainWindow;
+}
+
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    explicit MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
+
+    //void paintEvent(QPaintEvent *event);
+   // std::vector<std::vector<QLabel*>>label_card;
+    //mylabel *label_card[4][27]={};
+   // std::vector<QLabel*>temp;
+    QPainter a[4][27];
+    QPainter c[2][20];
+    QPainter emit_button;
+    QPainter tip;
+    QPainter exit;
+    QPainter tonghuashun;
+    QPainter tonghua;
+    QPainter shunzi;
+    QPainter hearts;
+    QPainter diamonds;
+    QPainter club;
+    QPainter spade;
+    QPainter jingong;
+    QPainter card_back;
+   // card temp_jingong;
+
+    int jingong_judge[4];
+    std::vector<card> card_jingong;
+    std::vector<card> card_return;
+    int jingong_count;
+
+
+     QPainter background;
+    QPixmap  b;
+   // QPainter c;
+     void paintEvent(QPaintEvent *event);
+private:
+    Ui::MainWindow *ui;
+    logic *game;
+
+//void paintEvent(QPaintEvent *event);
+    void card_show();
+    void initGame();
+    void initbigGame();
+    //QLabel *label;
+    //QWidget *bottom;
+    void put_picture(QPixmap & b,card judge);
+protected:
+    void mouseReleaseEvent(QMouseEvent *event);
+    void card_clicked();
+
+
+        int leiji1;                  //升级过A判断
+        int leiji2;
+        bool begin2;
+        bool begin3;
+
+        int played_point;            //本局打的啥
+        int pointone;                //第一家的点数
+        int pointtwo;                //第二家的点数
+        int battle_data[100][4];     //记录对局名次
+       // memset(battle_data,0,sizeof (battle_data));
+        int current_battle_number;   //当前是第几把
+        int win_turn=0;
+
+        bool begin=0;                 //接风操作
+        int count=0;
+
+        card temp;                  //改变顺序
+        unsigned int record1;
+        unsigned int record2;
+        int row;
+
+
+};
+
+#endif // MAINWINDOW_H

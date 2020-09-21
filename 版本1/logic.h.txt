@@ -1,0 +1,100 @@
+#ifndef LOGIC_H
+#define LOGIC_H
+
+#include <vector>
+
+enum suit{
+    hearts,diamonds,club,spade,blackjoker,redjoker,
+};
+enum way{
+    single_0,                                //单牌，1
+    double_1,                                //对子，2
+    three_2,                                 //三个相同，3
+    three_double_3,                          //三带二，5
+    three_three_4,                           //两个连续的三，6
+    single1_single2_single3_single4_single5_5,    //顺子，5
+    double1_double_2_double3_6,                   //三连对，6
+    bomb4_7,                          //四炸，4
+    king2_8,                          //双王炸，2
+    bomb5_9,                          //五炸，5
+    same_suit_single1_single2_single3_single4_single5_10,          //同花顺，5
+    bomb6_11,                         //六炸，6
+    king3_12,                         //三王炸，3
+    bomb7_13,                         //七炸，7
+    bomb8_14,                         //八炸，8
+    king4_15                          //四王炸，4
+
+};
+
+enum STATUS{
+    down,up
+};
+
+enum GUANDAN{
+    king,special,normal
+};
+
+struct card{
+    suit cardsuit;
+    int cardnumber;
+    STATUS status=down;
+    GUANDAN guandan=normal;
+    int from=-1;
+    //int to=-1;
+};
+
+
+const int cardsum_person=28;
+const int cardsum=104;
+
+class logic
+{
+public:
+    logic();
+
+    std::vector<std::vector<card>  >cardgame;   //牌局所有人的手牌
+    std::vector<std::vector<card>  >real_card;  //出完牌以后，实际上剩下的==原先的cardgame[i]
+    std::vector<card>cardpile;         //牌堆
+    std::vector<card>current_released_card;    //当前出的牌
+
+    std::vector<card>current_arena;    //"擂台"
+    std::vector<card>copy;
+    std::vector<card>copy2;
+
+    int pointone;                //第一家的点数
+    int pointtwo;                //第二家的点数
+    int battle_data[100][4];     //记录对局名次
+    int current_battle_number;   //当前是第几把
+    //int win_turn;
+    //int current_turn;
+    int person=100,turn=100;
+
+    int index;
+    unsigned int index1;
+    card temp;
+
+    //void startgame_all();            //初始化点数，牌局数据
+    void startgame_single_preparation();             //初始化手牌数据，开始游戏
+    void startgame_single();
+    void create_cardpile();   //创建崭新的牌堆
+    void shuffle_cardpile(/*std::vector<int> &cardpile*/);  //打乱牌堆
+    static bool cmp(const card &a,const card &b);    //排序函数
+    static bool cmp1(const card &a,const card &b);    //排序函数
+    static bool cmp2(const card &a,const card &b);
+    void distribute(/*std::vector<std::vector<card>  >cardgame,std::vector<int>cardpile*/);
+    //将打乱的牌堆按顺序依次发出，并通过前面的排序函数依次在各自的二维vector内部排序
+    void sort_card();
+    int judge_king(std::vector<card>a);
+    bool stop(int &a,int &b);               //是否达到a
+    int how_to_launch(std::vector<card> a);            //出牌的类型
+    bool single_end();           //单局是否结束
+   // int refuse_emit;          //不出，初值为零，到3结束，产生判断
+    int who_launch_current;   //当前出牌人
+    int who_launch_last;      //最先出这类型牌的人
+   // void choose_card(unsigned int turn,unsigned int person);
+    bool compare();
+    //void cardsort(std::vector<card>*a,std::vector<card>*b,int point);
+
+};
+
+#endif // LOGIC_H

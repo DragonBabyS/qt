@@ -1,0 +1,313 @@
+#include "logic.h"
+#include<vector>
+#include<time.h>
+#include<QTime>
+#include<algorithm>
+
+logic::logic()
+{
+
+}
+
+void logic::startgame_single_preparation()
+{
+    cardgame.clear();
+    //click_card_accumulation.clear();
+    cardpile.clear();
+    current_released_card.clear();
+    current_arena.clear();
+    //who_launch_current=0;    //后续需要改！！！！！！
+    create_cardpile();
+    shuffle_cardpile();
+    distribute();
+    //sort_card();
+}
+
+void logic::create_cardpile()
+{
+    for(int i=0;i<4;i++)
+    {
+        for(int j=2;j<=14;j++)
+        {
+            switch(i)
+            {
+                case 0:temp.cardsuit=hearts;break;
+                case 1:temp.cardsuit=diamonds;break;
+                case 2:temp.cardsuit=spade;break;
+                case 3:temp.cardsuit=club;break;
+            }
+            temp.cardnumber=j;
+            cardpile.push_back(temp);
+        }
+        for(int j=2;j<=14;j++)
+        {
+            switch(i)
+            {
+                case 0:temp.cardsuit=hearts;break;
+                case 1:temp.cardsuit=diamonds;break;
+                case 2:temp.cardsuit=spade;break;
+                case 3:temp.cardsuit=club;break;
+            }
+            temp.cardnumber=j;
+            cardpile.push_back(temp);
+        }
+    }
+
+    temp.cardsuit=blackjoker;
+    temp.cardnumber=16;
+    temp.guandan=king;
+    cardpile.push_back(temp);
+    temp.cardsuit=blackjoker;
+    temp.cardnumber=16;
+    temp.guandan=king;
+    cardpile.push_back(temp);
+
+    temp.cardsuit=redjoker;
+    temp.cardnumber=16;
+    temp.guandan=king;
+    cardpile.push_back(temp);
+    temp.cardsuit=redjoker;
+    temp.cardnumber=16;
+    temp.guandan=king;
+    cardpile.push_back(temp);
+}
+
+
+void logic::shuffle_cardpile()                   //利用vector的特性，结合qtime随机打乱数组，达到洗牌
+{
+    copy.clear();
+    for (int i = static_cast<int>(cardpile.size()); i > 0; i--)
+        {
+        qsrand(unsigned(time(nullptr)));
+        index = qrand()%i;
+        index1=static_cast<unsigned int>(index);
+        copy.push_back(cardpile[index1]);
+        cardpile.erase(cardpile.begin()+index);
+        }
+    cardpile=copy;
+    //copy2=copy;
+}
+
+bool logic::cmp(const card &a,const card &b)
+//头文件中将它定义为static成员函数，（cmp还有一个this指针的形参，而后续调用只需要两个参数，参数不一致）
+{
+    Q_UNUSED(a);                       //忽略"unused parameter" warnings
+    Q_UNUSED(b);
+    if(a.cardnumber!=b.cardnumber)
+    {
+        return a.cardnumber>b.cardnumber;
+    }
+    else
+        return a.cardsuit<b.cardsuit;
+
+}
+
+bool logic::cmp1(const card &a,const card &b)
+//头文件中将它定义为static成员函数，（cmp还有一个this指针的形参，而后续调用只需要两个参数，参数不一致）
+{
+    if(a.guandan!=b.guandan)
+        return a.guandan<b.guandan;
+     else
+     {
+            if(a.cardnumber!=b.cardnumber)
+            {
+                return a.cardnumber>b.cardnumber;
+            }
+            else
+                return a.cardsuit<b.cardsuit;
+     }
+}
+
+bool logic::cmp2(const card &a,const card &b)
+{
+    if(a.cardsuit!=b.cardsuit)
+        return a.cardsuit<b.cardsuit;
+    else
+        return a.cardnumber>b.cardnumber;
+}
+
+void logic::distribute()
+{
+
+    for (unsigned int i=0;i<4;i++)
+    {
+        copy.clear();
+          for(unsigned int j=0;j<27;j++)
+          {
+              copy.push_back(cardpile[0]);
+              cardpile.erase(cardpile.begin());
+          }
+          cardgame.push_back(copy);
+    }
+
+}
+
+void logic::sort_card()
+{
+    for (unsigned int i=0;i<4;i++)
+    {
+          for(unsigned int j=0;j<cardgame[i].size();j++)
+          sort(cardgame[i].begin(),cardgame[i].begin()+static_cast<int>(cardgame[i].size()),cmp1);
+
+    }
+}
+
+
+
+
+
+
+int logic::how_to_launch(std::vector<card> a)
+{
+    Q_UNUSED(a);
+    if(a.size()==0)
+        return -2;
+
+    if(a.size()==1)
+        return 0;
+
+    if(a.size()==2)
+    {
+        if(a[0].cardnumber==16&&a[1].cardnumber==16)
+            return 8;
+        else if(a[0].cardnumber==a[1].cardnumber&&a[0].cardnumber!=16&&a[1].cardnumber!=16)
+            return 1;
+        else
+            return -1;
+    }
+
+    if(a.size()==3)
+    {
+        if(a[0].cardnumber==16&&a[1].cardnumber==16&&a[2].cardnumber==16)
+            return 12;
+        else if(a[0].cardnumber==a[1].cardnumber&&a[1].cardnumber==a[2].cardnumber&&a[0].cardnumber!=16&&a[1].cardnumber!=16&&a[2].cardnumber!=16)
+            return 2;
+        else
+            return -1;
+    }
+
+    if(a.size()==4)
+    {
+        if(a[0].cardnumber==16&&a[1].cardnumber==16&&a[2].cardnumber==16&&a[3].cardnumber==16)
+            return 15;
+        else if(a[0].cardnumber==a[1].cardnumber&&a[1].cardnumber==a[2].cardnumber&&a[2].cardnumber==a[3].cardnumber)
+            return 7;
+        else
+            return -1;
+    }
+
+    if(a.size()==5)
+    {
+        if(a[0].cardnumber==a[1].cardnumber&&a[1].cardnumber==a[2].cardnumber&&a[2].cardnumber==a[3].cardnumber&&a[3].cardnumber==a[4].cardnumber)
+            return 9;
+        if((a[0].cardnumber==a[1].cardnumber&&a[1].cardnumber==a[2].cardnumber&&a[3].cardnumber==a[4].cardnumber&&a[0].cardnumber!=16&&a[1].cardnumber!=16&&a[2].cardnumber!=16&&a[3].cardnumber!=16&&a[4].cardnumber!=16)
+              ||(a[0].cardnumber==a[1].cardnumber&&a[2].cardnumber==a[3].cardnumber&&a[3].cardnumber==a[4].cardnumber&&a[0].cardnumber!=16&&a[1].cardnumber!=16&&a[2].cardnumber!=16&&a[3].cardnumber!=16&&a[4].cardnumber!=16))
+            return 3;
+        if(a[0].cardnumber==14&&a[1].cardnumber==5&&a[2].cardnumber==4&&a[3].cardnumber==3&&a[4].cardnumber==2)
+        {
+            if(a[0].cardsuit==a[1].cardsuit&&a[1].cardsuit==a[2].cardsuit&&a[2].cardsuit==a[3].cardsuit&&a[3].cardsuit==a[4].cardsuit)
+                return 10;
+            return 5;
+        }
+        //qDebug("%d_%d%_d",a[0].cardnumber,a[1].cardnumber,a[2].cardnumber);
+        if(a[1].cardnumber==a[0].cardnumber-1&&a[2].cardnumber==a[0].cardnumber-2&&a[3].cardnumber==a[0].cardnumber-3&&a[4].cardnumber==a[0].cardnumber-4&&a[0].cardnumber!=16&&a[1].cardnumber!=16&&a[2].cardnumber!=16&&a[3].cardnumber!=16&&a[4].cardnumber!=16)
+        {
+            if(a[0].cardsuit==a[1].cardsuit&&a[1].cardsuit==a[2].cardsuit&&a[2].cardsuit==a[3].cardsuit&&a[3].cardsuit==a[4].cardsuit)
+                return 10;
+            else
+                return 5;
+        }
+        else
+            return -1;
+    }
+    if(a.size()==6)
+    {
+        if(a[0].cardnumber==a[1].cardnumber&&a[1].cardnumber==a[2].cardnumber&&a[3].cardnumber==a[2].cardnumber-1&&a[3].cardnumber==a[4].cardnumber&&a[4].cardnumber==a[5].cardnumber&&
+                a[0].cardnumber!=16&&a[1].cardnumber!=16&&a[2].cardnumber!=16&&a[3].cardnumber!=16&&a[4].cardnumber!=16&&a[5].cardnumber!=16)
+            return 4;
+        else if(a[0].cardnumber==14&&a[3].cardnumber==2&&a[1].cardnumber==a[0].cardnumber&&a[2].cardnumber==a[1].cardnumber&&a[4].cardnumber==a[3].cardnumber&&a[5].cardnumber==a[4].cardnumber)
+            return 4;
+        else if(a[0].cardnumber==a[1].cardnumber&&a[2].cardnumber==a[1].cardnumber-1&&a[2].cardnumber==a[3].cardnumber&&a[4].cardnumber==a[3].cardnumber-1&&a[4].cardnumber==a[5].cardnumber&&
+                a[0].cardnumber!=16&&a[1].cardnumber!=16&&a[2].cardnumber!=16&&a[3].cardnumber!=16&&a[4].cardnumber!=16&&a[5].cardnumber!=16)
+            return 6;
+        else if(a[0].cardnumber==14&&a[2].cardnumber==3&&a[4].cardnumber==2&&a[0].cardnumber==a[1].cardnumber&&a[2].cardnumber==a[3].cardnumber&&a[4].cardnumber==a[5].cardnumber)
+            return 6;
+        else if(a[0].cardnumber==a[1].cardnumber&&a[1].cardnumber==a[2].cardnumber&&a[2].cardnumber==a[3].cardnumber&&a[3].cardnumber==a[4].cardnumber&&a[4].cardnumber==a[5].cardnumber)
+            return 11;
+        else
+            return -1;
+    }
+    if(a.size()==7)
+    {
+        if(a[0].cardnumber==a[1].cardnumber&&a[1].cardnumber==a[2].cardnumber&&a[3].cardnumber==a[4].cardnumber&&a[4].cardnumber==a[5].cardnumber&&a[5].cardnumber==a[6].cardnumber)
+            return 13;
+        else
+            return -1;
+    }
+    if(a.size()==8)
+    {
+        if(a[0].cardnumber==a[1].cardnumber&&a[1].cardnumber==a[2].cardnumber&&a[3].cardnumber==a[4].cardnumber&&a[4].cardnumber==a[5].cardnumber&&a[5].cardnumber==a[6].cardnumber&&a[6].cardnumber==a[7].cardnumber)
+            return 14;
+        else
+            return -1;
+    }
+    return -1;
+}
+
+bool logic::compare()
+{
+    //if(current_arena.empty()&&how_to_launch(current_released_card)!=-1)
+        //return true;
+
+    if(!current_released_card.empty()&&!current_arena.empty())
+    {
+        if(how_to_launch(current_released_card)<7&&how_to_launch(current_arena)<7)
+        {
+            if(how_to_launch(current_released_card)!=how_to_launch(current_arena))
+                return false;
+            else {
+                if(how_to_launch(current_released_card)==0||how_to_launch(current_released_card)==1||how_to_launch(current_released_card)==2)
+                {
+                    if(current_released_card[0].guandan!=current_arena[0].guandan)
+                        return current_released_card[0].guandan<current_arena[0].guandan;
+                    else
+                        return current_released_card[0].cardnumber>current_arena[0].cardnumber;
+                }
+
+
+                if(how_to_launch(current_released_card)==4||how_to_launch(current_released_card)==5||how_to_launch(current_released_card)==6)
+                    return current_released_card[3].cardnumber>current_arena[3].cardnumber;
+                if(how_to_launch(current_released_card)==3)
+                {
+                    if(current_released_card[2].guandan!=current_arena[2].guandan)
+                        return current_released_card[2].guandan<current_arena[2].guandan;
+                    else
+                        return current_released_card[2].cardnumber>current_arena[2].cardnumber;
+                }
+
+
+            }
+        }
+
+        if(how_to_launch(current_released_card)>=7||how_to_launch(current_arena)>=7)
+        { //qDebug("123");
+            if(how_to_launch(current_released_card)==10&&how_to_launch(current_arena)==10)
+                return current_released_card[2].cardnumber>current_arena[2].cardnumber;
+            return how_to_launch(current_released_card)>how_to_launch(current_arena);
+        }
+
+    }
+}
+
+
+int logic::judge_king(std::vector<card>a)
+{
+    int sum=0;
+    for(unsigned int i=0;i<a.size();i++)
+    {
+        if(a[i].cardsuit==redjoker)
+            sum++;
+    }
+    return sum;
+}
+

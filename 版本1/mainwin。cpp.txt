@@ -1,0 +1,1106 @@
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+#include <QDebug>
+#include <QtWidgets>
+#include "mylabel.h"
+#include <QMouseEvent>
+#include <QPainter>
+#include <algorithm>
+#include <string.h>
+#include <QPaintEvent>
+#include <QTime>
+
+MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::MainWindow)
+{
+    ui->setupUi(this);
+    //resize(1800,1000);
+    setWindowState(Qt::WindowFullScreen);
+    initbigGame();
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+
+void MainWindow::initbigGame()
+{
+    played_point=2;
+    pointone=2;                //第一家的点数
+    pointtwo=2;                //第二家的点数
+
+    row=0;
+    begin2=0;
+    begin3=0;
+    leiji1=0;
+    leiji2=0;
+    memset(battle_data,0,sizeof (battle_data));
+    current_battle_number=1;   //当前是第几把
+    initGame();
+    qsrand(unsigned(time(nullptr)));
+    game->who_launch_current=qrand()%4;
+}
+
+
+void MainWindow::initGame()
+{
+    begin=0;
+    count=0;
+    jingong_count=0;
+    win_turn=0;
+    game=new logic;
+    game->startgame_single_preparation();
+    for(unsigned int i=0;i<4;i++)
+    {
+        for(int j=0;j<27;j++)
+        {
+            if(game->cardgame[i][j].cardnumber==played_point)
+                game->cardgame[i][j].guandan=special;
+        }
+    }
+    game->sort_card();
+    ui->lcdNumber2->display(pointtwo);
+    ui->lcdNumber1->display(pointone);
+    ui->lcdNumber3->display(played_point);
+    card_jingong.clear();
+    card_return.clear();
+    if(current_battle_number>1)
+    {
+        if(battle_data[current_battle_number-1][0]%2==battle_data[current_battle_number-1][1]%2)
+        {
+            jingong_judge[battle_data[current_battle_number-1][0]]=1;
+            jingong_judge[battle_data[current_battle_number-1][1]]=1;
+            jingong_judge[battle_data[current_battle_number-1][2]]=-1;
+            jingong_judge[battle_data[current_battle_number-1][3]]=-1;
+            game->who_launch_current=battle_data[current_battle_number-1][3];
+            for(unsigned int i=0;i<4;i++)
+            {
+                for(unsigned int j=0;j<27;j++)
+                {
+                    if(jingong_judge[i]==-1&&game->cardgame[i][j].cardnumber!=16&&!(game->cardgame[i][j].guandan==special&&game->cardgame[i][j].cardsuit==0))
+                    {
+                        game->cardgame[i][j].status=up;
+                        break;
+                    }
+                }
+            }
+            if(game->judge_king(game->cardgame[battle_data[current_battle_number-1][2]])==2||
+                   game->judge_king(game->cardgame[battle_data[current_battle_number-1][3]])==2||
+                    (game->judge_king(game->cardgame[battle_data[current_battle_number-1][2]])==1
+                     &&game->judge_king(game->cardgame[battle_data[current_battle_number-1][3]])==1))
+            {
+                for(unsigned int i=0;i<4;i++)
+                {
+                    for(unsigned int j=0;j<27;j++)
+                    {
+                        if(jingong_judge[i]==-1&&game->cardgame[i][j].cardnumber!=16&&!(game->cardgame[i][j].guandan==special&&game->cardgame[i][j].cardsuit==0))
+                        {
+                            game->cardgame[i][j].status=down;
+                            break;
+                        }
+                    }
+                }
+                jingong_judge[0]=0;
+                jingong_judge[1]=0;
+                jingong_judge[2]=0;
+                jingong_judge[3]=0;
+                game->who_launch_current=battle_data[current_battle_number-1][0];
+
+
+            }
+        }
+        else if(battle_data[current_battle_number-1][0]%2==battle_data[current_battle_number-1][2]%2||
+                battle_data[current_battle_number-1][0]%2==battle_data[current_battle_number-1][3]%2)
+        {
+            jingong_judge[battle_data[current_battle_number-1][0]]=1;
+            jingong_judge[battle_data[current_battle_number-1][1]]=2;
+            jingong_judge[battle_data[current_battle_number-1][2]]=2;
+            jingong_judge[battle_data[current_battle_number-1][3]]=-1;
+            game->who_launch_current=battle_data[current_battle_number-1][3];
+            for(unsigned int i=0;i<4;i++)
+            {
+                for(unsigned int j=0;j<27;j++)
+                {
+                    if(jingong_judge[i]==-1&&game->cardgame[i][j].cardnumber!=16&&!(game->cardgame[i][j].guandan==special&&game->cardgame[i][j].cardsuit==0))
+                    {
+                        game->cardgame[i][j].status=up;
+                        break;
+                    }
+                }
+            }
+            if(game->judge_king(game->cardgame[battle_data[current_battle_number-1][3]])==2)
+            {
+                for(unsigned int i=0;i<4;i++)
+                {
+                    for(unsigned int j=0;j<27;j++)
+                    {
+                        if(jingong_judge[i]==-1&&game->cardgame[i][j].cardnumber!=16&&!(game->cardgame[i][j].guandan==special&&game->cardgame[i][j].cardsuit==0))
+                        {
+                            game->cardgame[i][j].status=down;
+                            break;
+                        }
+                    }
+                }
+                jingong_judge[0]=0;
+                jingong_judge[1]=0;
+                jingong_judge[2]=0;
+                jingong_judge[3]=0;
+                 game->who_launch_current=battle_data[current_battle_number-1][0];
+
+
+            }
+
+
+        }
+    }
+
+    else
+    {
+        jingong_judge[0]=0;
+        jingong_judge[1]=0;
+        jingong_judge[2]=0;
+        jingong_judge[3]=0;
+
+    }
+
+    game->real_card=game->cardgame;
+    update();
+}
+
+
+
+void MainWindow::mouseReleaseEvent(QMouseEvent *ev)
+{
+    Q_UNUSED(ev);
+    int i=ev->x();
+    int j=ev->y();
+    if(i>=450&&i<=(static_cast<int>(game->cardgame[0].size())-1)*30+110+450&&j>=730&&j<=930&&game->who_launch_current==0)
+    {
+        game->person=0;
+        game->turn=(i-450)/30;
+        if(game->turn>=static_cast<int>(game->cardgame[0].size()))
+            game->turn=static_cast<int>(game->cardgame[0].size())-1;
+    }
+    else if(i<=1340&&i>=1340-(static_cast<int>(game->cardgame[2].size())-1)*30-110&&j>=30&&j<=230&&game->who_launch_current==2)
+    {
+        game->person=2;
+        game->turn=(1340-i)/30;
+        if(game->turn>=static_cast<int>(game->cardgame[2].size()))
+            game->turn=static_cast<int>(game->cardgame[2].size())-1;
+    }
+    else if(i>=1340&&i<=1540&&j<=930&&j>=930-(static_cast<int>(game->cardgame[1].size())-1)*30-110&&game->who_launch_current==1)
+    {
+        game->person=1;
+        game->turn=(930-j)/30;
+        if(game->turn>=static_cast<int>(game->cardgame[1].size()))
+            game->turn=static_cast<int>(game->cardgame[1].size())-1;
+    }
+
+    else if(i>=250&&i<=450&&j>=40&&j<=40+(static_cast<int>(game->cardgame[3].size())-1)*30+110&&game->who_launch_current==3)
+    {
+        game->person=3;
+        game->turn=(j-40)/30;
+        if(game->turn>=static_cast<int>(game->cardgame[3].size()))
+            game->turn=static_cast<int>(game->cardgame[3].size())-1;
+    }
+
+    if(game->person!=100)
+        {
+           if(jingong_judge[game->who_launch_current]==0)
+           {
+                if(game->cardgame[game->person][game->turn].status==down)
+                {
+                    game->current_released_card.push_back(game->cardgame[game->person][game->turn]);
+                    game->real_card[game->person].erase(game->real_card[game->person].begin()+static_cast<int>(game->turn));
+                    sort(game->current_released_card.begin(),game->current_released_card.end(),game->cmp);
+                    game->cardgame[game->person][game->turn].status=up;
+                }
+                else
+                {
+                    for(unsigned int i=0;i<game->current_released_card.size();i++)
+                    {
+                        if(game->current_released_card[i].cardnumber==game->cardgame[game->person][game->turn].cardnumber&&
+                            game->current_released_card[i].cardsuit==game->cardgame[game->person][game->turn].cardsuit)
+                        {
+                           game->current_released_card.erase(game->current_released_card.begin()+i);
+                           break;
+                        }
+                    }
+                    game->real_card[game->person].push_back(game->cardgame[game->person][game->turn]);
+                    sort(game->real_card[game->person].begin(),game->real_card[game->person].end(),game->cmp1);
+                    game->cardgame[game->person][game->turn].status=down;
+                }
+                update();
+            }
+           else if(jingong_judge[game->who_launch_current]==1)
+            {
+                if(game->cardgame[game->person][game->turn].status==down)
+                {
+                    game->cardgame[game->person][game->turn].status=up;
+                    if(game->cardgame[game->person][game->turn].cardnumber>10)
+                       game->cardgame[game->person][game->turn].status=down;
+                }
+                else
+                    game->cardgame[game->person][game->turn].status=down;
+            }
+           update();
+        }
+
+    if (i>=1800&&i<=1910&&j>=950&&j<=1060)
+        close();
+
+
+    else if(i>=300&&i<=410&&j>=960&&j<=1040)
+    {
+       bool card_has_released=false;
+       for(int i=0;i<game->cardgame[game->who_launch_current].size();i++)
+       {
+           if(game->cardgame[game->who_launch_current][i].status==1)
+               card_has_released=true;
+       }
+
+
+
+       if((jingong_judge[game->who_launch_current]==-1||jingong_judge[game->who_launch_current]==1)&&card_has_released)
+        {
+            for(int i=0;i<27;i++)
+            {
+                if(game->cardgame[game->who_launch_current][i].status==up)
+                {
+                    game->cardgame[game->who_launch_current][i].from=game->who_launch_current;
+                    game->cardgame[game->who_launch_current][i].status=down;
+                    update();
+                    if(jingong_judge[game->who_launch_current]==-1)
+                    card_jingong.push_back(game->cardgame[game->who_launch_current][i]);
+                    else if(jingong_judge[game->who_launch_current]==1)
+                        card_return.push_back(game->cardgame[game->who_launch_current][i]);
+                    jingong_count++;
+                    jingong_judge[game->who_launch_current]=0;
+                    game->cardgame[game->who_launch_current].erase(game->cardgame[game->who_launch_current].begin()+i);
+                    break;
+                }
+            }
+            sort(game->cardgame[game->who_launch_current].begin(),game->cardgame[game->who_launch_current].end(),game->cmp1);
+            update();
+            jingong_judge[game->who_launch_current]=0;
+
+            game->who_launch_current=(game->who_launch_current+1)%4;
+            while(jingong_judge[game->who_launch_current]==2)
+            {
+                jingong_judge[game->who_launch_current]=0;
+                game->who_launch_current=(game->who_launch_current+1)%4;
+            }
+
+
+            if(jingong_judge[0]==0&&jingong_judge[1]==0&&jingong_judge[2]==0&&jingong_judge[3]==0)
+            {
+                if(jingong_count==4)
+                {
+                    sort(card_jingong.begin(),card_jingong.end(),game->cmp);
+                    game->cardgame[battle_data[current_battle_number-1][0]].push_back(card_jingong[0]);
+                    if(card_return[0].from==battle_data[current_battle_number-1][0])
+                    {
+                        game->cardgame[card_jingong[0].from].push_back(card_return[0]);
+                        game->cardgame[battle_data[current_battle_number-1][1]].push_back(card_jingong[1]);
+                        game->cardgame[card_jingong[1].from].push_back(card_return[1]);
+                    }
+                    else
+                    {
+                        game->cardgame[card_jingong[0].from].push_back(card_return[1]);
+                        game->cardgame[battle_data[current_battle_number-1][1]].push_back(card_jingong[1]);
+                        game->cardgame[card_jingong[1].from].push_back(card_return[0]);
+                    }
+                    if(card_jingong[0].cardnumber==card_jingong[1].cardnumber)
+                        game->who_launch_current=(battle_data[current_battle_number-1][0]+1)%4;
+                    else
+                        game->who_launch_current=card_jingong[0].from;
+                    update();
+                }
+                else if(jingong_count==2)
+                {
+                    card_jingong[0].status=down;
+                    card_return[0].status=down;
+                    game->cardgame[battle_data[current_battle_number-1][0]].push_back(card_jingong[0]);
+                    game->cardgame[card_jingong[0].from].push_back(card_return[0]);
+                    game->who_launch_current=card_jingong[0].from;
+                }
+                for(int i=0;i<4;i++)
+                {
+                    for(int j=0;j<game->cardgame[i].size();j++)
+                       game->cardgame[i][j].cardnumber;
+                }
+            }
+            game->sort_card();
+            game->real_card=game->cardgame;
+            update();
+        }
+        game->sort_card();
+        game->real_card=game->cardgame;
+        update();
+    }
+
+
+
+    else if(i>=450&&i<=600&&j>=940&&j<=1050)
+    {
+        game->person=100;
+        if(jingong_judge[game->who_launch_current]==0)
+        {
+            if(game->compare()||(game->current_arena.empty()&&game->current_released_card.empty()==0&&game->how_to_launch(game->current_released_card)!=-1))
+            {
+                game->cardgame[game->who_launch_current]=game->real_card[game->who_launch_current];
+                for(unsigned int i=0;i<game->cardgame[game->who_launch_current].size();i++)
+                     game->cardgame[game->who_launch_current][i].status=down;
+                if(begin)
+                    begin=0;
+                game->current_arena=game->current_released_card;
+                game->who_launch_last=game->who_launch_current;
+                if(game->cardgame[game->who_launch_current].empty())
+                {
+                    battle_data[current_battle_number][win_turn]=game->who_launch_current;
+                    win_turn++;
+                    begin=1;
+                    count=0;
+                    for(unsigned int i=0;i<4;i++)
+                    {
+                        if(!game->cardgame[i].empty())
+                            count++;
+                    }
+                }
+                game->who_launch_current=(game->who_launch_current+1)%4;
+                if(win_turn!=4)
+                while(game->cardgame[static_cast<unsigned int>(game->who_launch_current)].empty()!=0)
+                game->who_launch_current=(game->who_launch_current+1)%4;
+                game->current_released_card.clear();
+            }
+            else if((game->how_to_launch(game->current_released_card)==-1||game->compare()==0)&&game->how_to_launch(game->current_released_card)!=-2)
+            {
+                game->real_card[static_cast<unsigned>(game->who_launch_current)].insert(game->real_card[static_cast<unsigned>(game->who_launch_current)].end(),game->current_released_card.begin(),game->current_released_card.end());
+                sort(game->real_card[static_cast<unsigned>(game->who_launch_current)].begin(),game->real_card[static_cast<unsigned>(game->who_launch_current)].end(),game->cmp1);
+                for(unsigned int i=0;i<game->cardgame[game->who_launch_current].size();i++)
+                    game->cardgame[game->who_launch_current][i].status=down;
+                    game->current_released_card.clear();
+            }
+            else if(game->current_arena.empty()==0&&game->current_released_card.empty())
+            {
+                game->who_launch_current=(game->who_launch_current+1)%4;
+                if(win_turn!=4)
+                while(game->real_card[static_cast<unsigned int>(game->who_launch_current)].empty()!=0)
+                game->who_launch_current=(game->who_launch_current+1)%4;
+                if(begin)
+                count--;
+            }
+
+            if(begin&&count==0)
+            {
+                if(game->real_card[(game->who_launch_last+2)%4].empty()==0)
+                    game->who_launch_current=(game->who_launch_last+2)%4;
+                begin=0;
+                game->current_arena.clear();
+            }
+            if(game->who_launch_last==game->who_launch_current)
+                game->current_arena.clear();
+
+            if(game->cardgame[0].empty()&&game->cardgame[1].empty()&&game->cardgame[2].empty()&&game->cardgame[3].empty())
+            {
+                QStringList list;
+                list<<QString("%1:     %2    %3    %4    %5").arg(current_battle_number).arg(battle_data[current_battle_number][0]).arg(battle_data[current_battle_number][1]).arg(battle_data[current_battle_number][2]).arg(battle_data[current_battle_number][3]);
+                ui->listWidget->addItems(list);
+                if(battle_data[current_battle_number][0]%2==0)
+                {
+                    if(battle_data[current_battle_number][1]%2==0)
+                    pointone+=3;
+                    else if(battle_data[current_battle_number][3]%2==0)
+                    pointone+=1;
+                    else
+                        pointone+=2;
+                    if(pointone>14)
+                        pointone=14;
+                    played_point=pointone;
+                }
+
+
+                if(battle_data[current_battle_number][0]%2==1)
+                {
+                    if(battle_data[current_battle_number][1]%2==1)
+                    pointtwo+=3;
+                    else if(battle_data[current_battle_number][3]%2==1)
+                    pointtwo+=1;
+                    else
+                        pointtwo+=2;
+                    if(pointtwo>14)
+                        pointtwo=14;
+                    played_point=pointtwo;
+                }
+                if(begin2==1||begin3==1)
+                {
+                    if(begin2==1)
+                    {
+                        if(battle_data[current_battle_number][0]%2==0&&battle_data[current_battle_number][3]%2!=0&&leiji1<=3)
+                        {
+                            QStringList list1;
+                            list1<<QString("————————————————");
+                            ui->listWidget->addItems(list1);
+                            initbigGame();}
+                        else if(battle_data[current_battle_number][0]%2!=0&&leiji1<=3)
+                        {
+                            leiji1++;
+                            if(leiji1==3)
+                            {
+                                pointone=2;
+                                if(battle_data[current_battle_number][0]%2==0)
+                                played_point=2;
+                                begin2=0;
+                                leiji1=0;
+                                current_battle_number++;
+                                initGame();
+                            }
+                            current_battle_number++;
+                            initGame();
+
+                        }
+                        else if(battle_data[current_battle_number][0]%2==0&&battle_data[current_battle_number][3]%2==0&&leiji1<=3)
+                        {
+                            leiji1++;
+                            if(leiji1==3)
+                            {
+                                pointone=2;
+                                if(battle_data[current_battle_number][0]%2==0)
+                                played_point=2;
+                                begin2=0;
+                                leiji1=0;
+                                current_battle_number++;
+                                initGame();
+                            }
+                            current_battle_number++;
+                            initGame();
+                        }
+                    }
+                    if(begin3==1)
+                    {
+                        if(battle_data[current_battle_number][0]%2==1&&battle_data[current_battle_number][3]%2!=1&&leiji2<=3)
+                        {
+                            QStringList list2;
+                            list2<<QString("————————————————");
+                            ui->listWidget->addItems(list2);
+                            initbigGame();
+                        }
+                        else if(battle_data[current_battle_number][0]%2!=1&&leiji1<=3)
+                        {
+                            leiji2++;
+                            if(leiji2>=3)
+                            {
+                                pointtwo=2;
+                                if(battle_data[current_battle_number][0]%2==1)
+                                played_point=2;
+                                begin3=0;
+                                leiji2=0;
+                                current_battle_number++;
+                                initGame();
+                            }
+                            current_battle_number++;
+                            initGame();
+                        }
+                        else if(battle_data[current_battle_number][0]%2==1&&battle_data[current_battle_number][3]%2==1&&leiji2<=3)
+                        {
+                            leiji2++;
+                            if(leiji2>=3)
+                            {
+                                pointtwo=2;
+                                if(battle_data[current_battle_number][0]%2==1)
+                                played_point=2;
+                                begin3=0;
+                                leiji2=0;
+                                current_battle_number++;
+                                initGame();
+                            }
+                            current_battle_number++;
+                            initGame();
+                        }
+                    }
+                }
+                else
+                {
+                    current_battle_number++;
+                    initGame();
+                }
+
+                if(begin2==0&&pointone==14)
+                {
+                    begin2=1;
+                    leiji1=0;
+                }
+
+                if(begin3==0&&pointtwo==14)
+                {
+                    begin3=1;
+                    leiji2=0;
+                }
+            }
+        update();
+        }
+    }
+
+   else if(i>=1440&&i<=1520&&j>=960&&j<=1040)
+   {
+       for(int i=0;i<game->cardgame[game->who_launch_current].size();i++)
+       game->cardgame[game->who_launch_current][i].status=down;
+       game->current_released_card.clear();
+       update();
+       sort(game->cardgame[game->who_launch_current].begin(),game->cardgame[game->who_launch_current].end(),game->cmp2);
+       game->real_card=game->cardgame;
+       int hearts_start,hearts_end;
+       for( int i=0;i<game->cardgame[game->who_launch_current].size();i++)
+       {
+           if(game->cardgame[game->who_launch_current][i].cardsuit==0)
+           {
+               hearts_start=i;
+               break;
+           }
+       }
+       int i=hearts_start;
+       while(game->cardgame[game->who_launch_current][i].cardsuit==0)
+       {
+           game->cardgame[game->who_launch_current][i].status=up;
+           game->current_released_card.push_back( game->cardgame[game->who_launch_current][i]);
+           i++;
+       }
+       hearts_end=i;
+       game->real_card[game->who_launch_current].erase( game->real_card[game->who_launch_current].begin()+hearts_start,game->real_card[game->who_launch_current].begin()+hearts_end);
+       sort(game->real_card[game->who_launch_current].begin(),game->real_card[game->who_launch_current].end(),game->cmp);
+       sort(game->cardgame[game->who_launch_current].begin(),game->cardgame[game->who_launch_current].end(),game->cmp1);
+       sort(game->current_released_card.begin(),game->current_released_card.end(),game->cmp);
+   }
+
+   else if(i>=1520&&i<=1600&&j>=960&&j<=1040)
+   {
+       for(int i=0;i<game->cardgame[game->who_launch_current].size();i++)
+       game->cardgame[game->who_launch_current][i].status=down;
+       game->current_released_card.clear();
+       update();
+       sort(game->cardgame[game->who_launch_current].begin(),game->cardgame[game->who_launch_current].end(),game->cmp2);
+       game->real_card=game->cardgame;
+       int hearts_start,hearts_end;
+       for( int i=0;i<game->cardgame[game->who_launch_current].size();i++)
+       {
+           if(game->cardgame[game->who_launch_current][i].cardsuit==1)
+           {
+               hearts_start=i;
+               break;
+           }
+       }
+       int i=hearts_start;
+       while(game->cardgame[game->who_launch_current][i].cardsuit==1)
+       {
+           game->cardgame[game->who_launch_current][i].status=up;
+           game->current_released_card.push_back( game->cardgame[game->who_launch_current][i]);
+           i++;
+       }
+       hearts_end=i;
+       game->real_card[game->who_launch_current].erase( game->real_card[game->who_launch_current].begin()+hearts_start,game->real_card[game->who_launch_current].begin()+hearts_end);
+       sort(game->real_card[game->who_launch_current].begin(),game->real_card[game->who_launch_current].end(),game->cmp);
+       sort(game->cardgame[game->who_launch_current].begin(),game->cardgame[game->who_launch_current].end(),game->cmp1);
+       sort(game->current_released_card.begin(),game->current_released_card.end(),game->cmp);
+   }
+
+   else if(i>=1600&&i<=1680&&j>=960&&j<=1040)
+   {
+       for(int i=0;i<game->cardgame[game->who_launch_current].size();i++)
+       game->cardgame[game->who_launch_current][i].status=down;
+       game->current_released_card.clear();
+       update();
+       sort(game->cardgame[game->who_launch_current].begin(),game->cardgame[game->who_launch_current].end(),game->cmp2);
+       game->real_card=game->cardgame;
+       int hearts_start,hearts_end;
+       for( int i=0;i<game->cardgame[game->who_launch_current].size();i++)
+        {
+           if(game->cardgame[game->who_launch_current][i].cardsuit==2)
+            {
+                hearts_start=i;
+                break;
+            }
+        }
+       int i=hearts_start;
+       while(game->cardgame[game->who_launch_current][i].cardsuit==2)
+        {
+            game->cardgame[game->who_launch_current][i].status=up;
+            game->current_released_card.push_back( game->cardgame[game->who_launch_current][i]);
+            i++;
+        }
+       hearts_end=i;
+        game->real_card[game->who_launch_current].erase( game->real_card[game->who_launch_current].begin()+hearts_start,game->real_card[game->who_launch_current].begin()+hearts_end);
+        sort(game->real_card[game->who_launch_current].begin(),game->real_card[game->who_launch_current].end(),game->cmp);
+        sort(game->cardgame[game->who_launch_current].begin(),game->cardgame[game->who_launch_current].end(),game->cmp1);
+        sort(game->current_released_card.begin(),game->current_released_card.end(),game->cmp);
+   }
+
+   else if(i>=1680&&i<=1760&&j>=960&&j<=1040)
+   {
+        for(int i=0;i<game->cardgame[game->who_launch_current].size();i++)
+        game->cardgame[game->who_launch_current][i].status=down;
+        game->current_released_card.clear();
+        update();
+        sort(game->cardgame[game->who_launch_current].begin(),game->cardgame[game->who_launch_current].end(),game->cmp2);
+        game->real_card=game->cardgame;
+        int hearts_start,hearts_end;
+        for( int i=0;i<game->cardgame[game->who_launch_current].size();i++)
+        {
+            if(game->cardgame[game->who_launch_current][i].cardsuit==3)
+            {
+                hearts_start=i;
+                break;
+            }
+        }
+        int i=hearts_start;
+        while(game->cardgame[game->who_launch_current][i].cardsuit==3)
+        {
+            game->cardgame[game->who_launch_current][i].status=up;
+            game->current_released_card.push_back( game->cardgame[game->who_launch_current][i]);
+            i++;
+        }
+        hearts_end=i;
+        game->real_card[game->who_launch_current].erase( game->real_card[game->who_launch_current].begin()+hearts_start,game->real_card[game->who_launch_current].begin()+hearts_end);
+        sort(game->real_card[game->who_launch_current].begin(),game->real_card[game->who_launch_current].end(),game->cmp);
+        sort(game->cardgame[game->who_launch_current].begin(),game->cardgame[game->who_launch_current].end(),game->cmp1);
+        sort(game->current_released_card.begin(),game->current_released_card.end(),game->cmp);
+    }
+
+    else if(i>=1320&&i<=1430&&j>=950&&j<=1060)
+    {
+        sort(game->cardgame[game->who_launch_current].begin(),game->cardgame[game->who_launch_current].end(),game->cmp);
+        int shunzi_start,shunzi_record[5],record=1;
+        for( int i=game->cardgame[game->who_launch_current].size()-1;i>=0;i--)
+        {
+            if(game->cardgame[game->who_launch_current][i].status==1)
+            {
+                shunzi_start=i;
+                break;
+            }
+        }
+        shunzi_record[0]=shunzi_start;
+        if(game->cardgame[game->who_launch_current][shunzi_start].cardnumber<=10)
+        {
+            for( int i=shunzi_start-1;i>=0;i--)
+            {
+                if(game->cardgame[game->who_launch_current][i].cardnumber==game->cardgame[game->who_launch_current][shunzi_start].cardnumber+record)
+                {
+                    shunzi_record[record++]=i;
+                    game->cardgame[game->who_launch_current][i].status=up;
+                    if(record==5)
+                        break;
+                }
+            }
+        }
+        if(record==5)
+        {
+            game->current_released_card.push_back(game->cardgame[game->who_launch_current][shunzi_record[1]]);
+            game->current_released_card.push_back(game->cardgame[game->who_launch_current][shunzi_record[2]]);
+            game->current_released_card.push_back(game->cardgame[game->who_launch_current][shunzi_record[3]]);
+            game->current_released_card.push_back(game->cardgame[game->who_launch_current][shunzi_record[4]]);
+            sort(game->current_released_card.begin(),game->current_released_card.end(),game->cmp);
+            for(int i=0;i<4;i++)
+                game->real_card[game->who_launch_current].erase(game->real_card[game->who_launch_current].begin()+shunzi_record[i+1]-i);
+        }
+        else
+        {
+            for(int i=0;i<game->cardgame[game->who_launch_current].size();i++)
+                game->cardgame[game->who_launch_current][i].status=down;
+        }
+        game->sort_card();
+        game->real_card=game->cardgame;
+        update();
+    }
+
+
+    else if(i>=1200&&i<=1310&&j>=950&&j<=1060)
+    {
+
+        for(int i=0;i<game->cardgame[game->who_launch_current].size();i++)
+        game->cardgame[game->who_launch_current][i].status=down;
+        game->current_released_card.clear();
+        game->real_card=game->cardgame;
+        sort(game->cardgame[game->who_launch_current].begin(),game->cardgame[game->who_launch_current].end(),game->cmp2);
+        bool exist=false;
+
+        std::vector<int>shunzi_record_;
+        for(int k=0;k<4;k++)
+        {
+
+            int hearts_start;
+            for( int i=0;i<game->cardgame[game->who_launch_current].size();i++)
+            {
+                if(game->cardgame[game->who_launch_current][i].cardsuit==k)
+                {
+                    hearts_start=i;
+                    break;
+                }
+            }
+            int j;
+            j=hearts_start;
+            shunzi_record_.clear();
+            // qDebug("%d",shunzi_record_.size());
+            qDebug("%d",k);
+            while(game->cardgame[game->who_launch_current][j].cardsuit==k)
+            {
+                if(j==game->cardgame[game->who_launch_current].size()-1)
+                {
+                    shunzi_record_.push_back((j));
+                    break;
+                }
+                if(game->cardgame[game->who_launch_current][j].cardnumber!=game->cardgame[game->who_launch_current][j+1].cardnumber||
+                    game->cardgame[game->who_launch_current][j].cardsuit!=game->cardgame[game->who_launch_current][j+1].cardsuit)
+                    shunzi_record_.push_back(j);
+                j++;
+
+             //qDebug("%d",shunzi_record_.size());
+            }
+
+
+            if(shunzi_record_.size()>=5)
+            {//qDebug("caonima");
+                for(int j=shunzi_record_.size()-1;j>=4;j--)
+                {
+                    if(game->cardgame[game->who_launch_current][shunzi_record_[j-1]].cardnumber==game->cardgame[game->who_launch_current][shunzi_record_[j]].cardnumber+1&&
+                       game->cardgame[game->who_launch_current][shunzi_record_[j-2]].cardnumber==game->cardgame[game->who_launch_current][shunzi_record_[j]].cardnumber+2&&
+                       game->cardgame[game->who_launch_current][shunzi_record_[j-3]].cardnumber==game->cardgame[game->who_launch_current][shunzi_record_[j]].cardnumber+3&&
+                       game->cardgame[game->who_launch_current][shunzi_record_[j-4]].cardnumber==game->cardgame[game->who_launch_current][shunzi_record_[j]].cardnumber+4)
+                    {
+                        game->cardgame[game->who_launch_current][shunzi_record_[j]].status=up;
+                        game->cardgame[game->who_launch_current][shunzi_record_[j-1]].status=up;
+                        game->cardgame[game->who_launch_current][shunzi_record_[j-2]].status=up;
+                        game->cardgame[game->who_launch_current][shunzi_record_[j-3]].status=up;
+                        game->cardgame[game->who_launch_current][shunzi_record_[j-4]].status=up;
+                        exist=true;
+
+
+                    }
+                }
+            }
+            //qDebug("caonima");
+        }
+
+        if(exist)
+        {
+            sort(game->cardgame[game->who_launch_current].begin(),game->cardgame[game->who_launch_current].end(),game->cmp);
+            game->real_card=game->cardgame;
+            std::vector<int> real_card_help;
+            for(int i=0;i<game->cardgame[game->who_launch_current].size();i++)
+            {
+                if(game->cardgame[game->who_launch_current][i].status==1)
+                {
+                    game->current_released_card.push_back(game->cardgame[game->who_launch_current][i]);
+                    real_card_help.push_back(i);
+                }
+            }
+            sort(game->current_released_card.begin(),game->current_released_card.end(),game->cmp);
+
+            for(int i=0;i<real_card_help.size();i++)
+            game->real_card[game->who_launch_current].erase(game->real_card[game->who_launch_current].begin()+real_card_help[i]-i);
+            sort(game->real_card[game->who_launch_current].begin(),game->real_card[game->who_launch_current].end(),game->cmp1);
+            game->sort_card();
+        }
+        else {
+            game->sort_card();
+            game->real_card=game->cardgame;
+        }
+
+
+
+        update();
+
+    }
+
+
+
+
+    else if(i>=1090&&i<=1200&&j>=950&&j<=1060)
+    {
+        for(int i=0;i<game->cardgame[game->who_launch_current].size();i++)
+            game->cardgame[game->who_launch_current][i].status=down;
+        game->real_card=game->cardgame;
+        game->current_released_card.clear();
+        update();
+    }
+
+    else
+        game->person=100;
+}
+
+void MainWindow::paintEvent(QPaintEvent *event)
+{
+    Q_UNUSED(event);
+
+    background.begin(this);
+    b.load("://新建文件夹/千库网_中国风圆形大气毛笔刷笔触元素_元素编号11976617.png");
+    background.drawPixmap(330,0,1200,1000,b);
+    background.end();
+
+    for (unsigned int i = 0; i<game->cardgame[0].size(); i++)
+        {
+            a[0][i].begin(this);
+            put_picture(b,game->cardgame[0][static_cast<unsigned int>(i)]);
+            if(game->cardgame[0][i].status==down)
+                a[0][i].drawPixmap(450+static_cast<int>(i)* 30, 780, 110, 150,b);
+            else
+                a[0][i].drawPixmap(450+static_cast<int>(i)* 30, 730, 110, 150,b);
+            a[0][i].end();
+        }
+    for (unsigned int i = 0; i<game->cardgame[1].size(); i++)
+        {
+            a[1][i].begin(this);
+            put_picture(b,game->cardgame[1][static_cast<unsigned int>(i)]);
+            if(game->cardgame[1][i].status==down)
+            {
+                a[1][i].translate(1340,930);
+                a[1][i].rotate(90);
+                a[1][i].translate(-1340,-930);
+                a[1][i].drawPixmap(1230-static_cast<int>(i)* 30, 730, 110, 150,b);
+            }
+            else
+            {
+                a[1][i].translate(1290,930);
+                a[1][i].rotate(90);
+                a[1][i].translate(-1290,-930);
+                a[1][i].drawPixmap(1230-static_cast<int>(i)* 30-50, 730, 110, 150,b);
+            }
+            a[1][i].end();
+        }
+
+
+    for (unsigned int i = 0; i<game->cardgame[2].size(); i++)
+        {
+            a[2][i].begin(this);
+            put_picture(b,game->cardgame[2][static_cast<unsigned int>(i)]);
+            if(game->cardgame[2][i].status==down)
+                a[2][i].drawPixmap(1230-static_cast<int>(i)* 30, 30, 110, 150,b);
+            else
+                a[2][i].drawPixmap(1230-static_cast<int>(i)* 30, 80, 110, 150,b);
+            a[2][i].end();
+        }
+
+
+    for (unsigned int i = 0; i<game->cardgame[3].size(); i++)
+        {
+            a[3][i].begin(this);
+            put_picture(b,game->cardgame[3][static_cast<unsigned int>(i)]);
+            if(game->cardgame[3][i].status==down)
+            {
+                a[3][i].translate(450,930);
+                a[3][i].rotate(270);
+                a[3][i].translate(-450,-930);
+                a[3][i].drawPixmap(1230-static_cast<int>(i)* 30,730,110,150,b);
+            }
+            else
+            {
+                a[3][i].translate(500,930);
+                a[3][i].rotate(270);
+                a[3][i].translate(-500,-930);
+                a[3][i].drawPixmap(1230-static_cast<int>(i)* 30+50,730,110,150,b);
+            }
+            a[3][i].end();
+        }
+
+
+
+    for(unsigned int i=0;i<game->current_arena.size();i++)
+    {
+        c[1][i].begin(this);
+        put_picture(b,game->current_arena[i]);
+        c[1][i].drawPixmap(550+45*static_cast<int>(i),300,110,150,b);
+        c[1][i].end();
+    }
+    tip.begin(this);
+    b.load("://新建文件夹/图层 9.png");
+    switch (game->who_launch_current) {
+    case 0:tip.drawPixmap(850,940,100,110,b);break;
+    case 1:tip.drawPixmap(1550,440,100,110,b);break;
+    case 2:tip.drawPixmap(850,220,100,110,b);break;
+    case 3:tip.drawPixmap(130,440,100,110,b);break;
+    }
+    tip.end();
+
+    emit_button.begin(this);
+    b.load("://新建文件夹/图层 8.png");
+    emit_button.drawPixmap(475,960,150,80,b);
+    emit_button.end();
+
+    exit.begin(this);
+    b.load("://新建文件夹/u=3080983285,1328824575&fm=26&gp=0.jpg");
+    exit.drawPixmap(1800,950,110,110,b);
+    exit.end();
+
+    tonghuashun.begin(this);
+    b.load("://新建文件夹/图层 1.png");
+    tonghuashun.drawPixmap(1200,950,110,110,b);
+    tonghuashun.end();
+
+
+
+    tonghua.begin(this);
+    b.load("://新建文件夹/图层 2.png");
+    tonghua.drawPixmap(1320,950,110,110,b);
+    tonghua.end();
+
+    hearts.begin(this);
+    b.load("://新建文件夹/图层 4.png");
+    hearts.drawPixmap(1440,960,80,80,b);
+    hearts.end();
+
+    diamonds.begin(this);
+    b.load("://新建文件夹/图层 7.png");
+    diamonds.drawPixmap(1520,960,80,80,b);
+    diamonds.end();
+
+    club.begin(this);
+    b.load("://新建文件夹/图层 6.png");
+    club.drawPixmap(1600,960,80,80,b);
+    club.end();
+
+    spade.begin(this);
+    b.load("://新建文件夹/图层 5.png");
+    spade.drawPixmap(1680,960,80,80,b);
+    spade.end();
+
+    jingong.begin(this);
+    b.load("://新建文件夹/微信截图_20200911151639.png");
+    jingong.drawPixmap(300,960,110,80,b);
+    jingong.end();
+
+    card_back.begin(this);
+    b.load("://新建文件夹/图层 3.png");
+    card_back.drawPixmap(1090,950,110,110,b);
+    card_back.end();
+
+
+
+
+}
+
+void MainWindow::put_picture(QPixmap & b,card judge)
+{
+    if(judge.cardsuit==0&&judge.cardnumber==2)
+    b.load("://新建文件夹/微信截图_20200907103553.png");
+    if(judge.cardsuit==1&&judge.cardnumber==2)
+    b.load("://新建文件夹/微信截图_20200907103541.png");
+    if(judge.cardsuit==2&&judge.cardnumber==2)
+    b.load("://新建文件夹/微信截图_20200907103530.png");
+    if(judge.cardsuit==3&&judge.cardnumber==2)
+    b.load("://新建文件夹/微信截图_20200907103519.png");
+
+    if(judge.cardsuit==0&&judge.cardnumber==3)
+    b.load("://新建文件夹/微信截图_20200907103504.png");
+    if(judge.cardsuit==1&&judge.cardnumber==3)
+    b.load("://新建文件夹/微信截图_20200907103421.png");
+    if(judge.cardsuit==2&&judge.cardnumber==3)
+    b.load("://新建文件夹/微信截图_20200907103448.png");
+    if(judge.cardsuit==3&&judge.cardnumber==3)
+    b.load("://新建文件夹/微信截图_20200907103436.png");
+
+    if(judge.cardsuit==0&&judge.cardnumber==4)
+    b.load("://新建文件夹/微信截图_20200907103355.png");
+    if(judge.cardsuit==1&&judge.cardnumber==4)
+    b.load("://新建文件夹/微信截图_20200907103405.png");
+    if(judge.cardsuit==2&&judge.cardnumber==4)
+    b.load("://新建文件夹/微信截图_20200907103344.png");
+    if(judge.cardsuit==3&&judge.cardnumber==4)
+    b.load("://新建文件夹/微信截图_20200907103333.png");
+
+    if(judge.cardsuit==0&&judge.cardnumber==5)
+    b.load("://新建文件夹/微信截图_20200907103303.png");
+    if(judge.cardsuit==1&&judge.cardnumber==5)
+    b.load("://新建文件夹/微信截图_20200907103251.png");
+    if(judge.cardsuit==2&&judge.cardnumber==5)
+    b.load("://新建文件夹/微信截图_20200907103313.png");
+    if(judge.cardsuit==3&&judge.cardnumber==5)
+    b.load("://新建文件夹/微信截图_20200907103323.png");
+
+    if(judge.cardsuit==0&&judge.cardnumber==6)
+    b.load("://新建文件夹/微信截图_20200907103226.png");
+    if(judge.cardsuit==1&&judge.cardnumber==6)
+    b.load("://新建文件夹/微信截图_20200907103238.png");
+    if(judge.cardsuit==2&&judge.cardnumber==6)
+    b.load("://新建文件夹/微信截图_20200907103205.png");
+    if(judge.cardsuit==3&&judge.cardnumber==6)
+    b.load("://新建文件夹/微信截图_20200907103150.png");
+
+    if(judge.cardsuit==0&&judge.cardnumber==7)
+    b.load("://新建文件夹/微信截图_20200907103057.png");
+    if(judge.cardsuit==1&&judge.cardnumber==7)
+    b.load("://新建文件夹/微信截图_20200907103039.png");
+    if(judge.cardsuit==2&&judge.cardnumber==7)
+    b.load("://新建文件夹/微信截图_20200907103109.png");
+    if(judge.cardsuit==3&&judge.cardnumber==7)
+    b.load("://新建文件夹/微信截图_20200907103134.png");
+
+    if(judge.cardsuit==0&&judge.cardnumber==8)
+    b.load("://新建文件夹/微信截图_20200907103010.png");
+    if(judge.cardsuit==1&&judge.cardnumber==8)
+    b.load("://新建文件夹/微信截图_20200907103027.png");
+    if(judge.cardsuit==2&&judge.cardnumber==8)
+    b.load("://新建文件夹/微信截图_20200907102958.png");
+    if(judge.cardsuit==3&&judge.cardnumber==8)
+    b.load("://新建文件夹/微信截图_20200907102941.png");
+
+    if(judge.cardsuit==0&&judge.cardnumber==9)
+    b.load("://新建文件夹/微信截图_20200907102850.png");
+    if(judge.cardsuit==1&&judge.cardnumber==9)
+    b.load("://新建文件夹/微信截图_20200907102841.png");
+    if(judge.cardsuit==2&&judge.cardnumber==9)
+    b.load("://新建文件夹/微信截图_20200907102902.png");
+    if(judge.cardsuit==3&&judge.cardnumber==9)
+    b.load("://新建文件夹/微信截图_20200907102919.png");
+
+    if(judge.cardsuit==0&&judge.cardnumber==10)
+    b.load("://新建文件夹/微信截图_20200907102815.png");
+    if(judge.cardsuit==1&&judge.cardnumber==10)
+    b.load("://新建文件夹/微信截图_20200907102739.png");
+    if(judge.cardsuit==2&&judge.cardnumber==10)
+    b.load("://新建文件夹/微信截图_20200907102825.png");
+    if(judge.cardsuit==3&&judge.cardnumber==10)
+    b.load("://新建文件夹/微信截图_20200907102756.png");
+
+    if(judge.cardsuit==0&&judge.cardnumber==11)
+    b.load("://新建文件夹/微信截图_20200907102550.png");
+    if(judge.cardsuit==1&&judge.cardnumber==11)
+    b.load("://新建文件夹/微信截图_20200908101330.png");
+    if(judge.cardsuit==2&&judge.cardnumber==11)
+    b.load("://新建文件夹/微信截图_20200907102515.png");
+    if(judge.cardsuit==3&&judge.cardnumber==11)
+    b.load("://新建文件夹/微信截图_20200907102606.png");
+
+    if(judge.cardsuit==0&&judge.cardnumber==12)
+    b.load("://新建文件夹/微信截图_20200907102444.png");
+    if(judge.cardsuit==1&&judge.cardnumber==12)
+    b.load("://新建文件夹/微信截图_20200907102432.png");
+    if(judge.cardsuit==2&&judge.cardnumber==12)
+    b.load("://新建文件夹/微信截图_20200907102413.png");
+    if(judge.cardsuit==3&&judge.cardnumber==12)
+    b.load("://新建文件夹/微信截图_20200907102503.png");
+
+    if(judge.cardsuit==0&&judge.cardnumber==13)
+    b.load("://新建文件夹/微信截图_20200907102324.png");
+    if(judge.cardsuit==1&&judge.cardnumber==13)
+    b.load("://新建文件夹/微信截图_20200907102337.png");
+    if(judge.cardsuit==2&&judge.cardnumber==13)
+    b.load("://新建文件夹/club_K.png");
+    if(judge.cardsuit==3&&judge.cardnumber==13)
+    b.load("://新建文件夹/微信截图_20200907102359.png");
+
+    if(judge.cardsuit==0&&judge.cardnumber==14)
+    b.load("://新建文件夹/微信截图_20200907102630.png");
+    if(judge.cardsuit==1&&judge.cardnumber==14)
+    b.load("://新建文件夹/微信截图_20200907102711.png");
+    if(judge.cardsuit==2&&judge.cardnumber==14)
+    b.load("://新建文件夹/微信截图_20200907102649.png");
+    if(judge.cardsuit==3&&judge.cardnumber==14)
+    b.load("://新建文件夹/微信截图_20200907102724.png");
+
+    if(judge.cardsuit==4&&judge.cardnumber==16)
+    b.load("://新建文件夹/微信图片_20200908142551.jpg");
+    if(judge.cardsuit==5&&judge.cardnumber==16)
+    b.load("://新建文件夹/微信截图_20200907104707.png");
+}
+
