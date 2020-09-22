@@ -1,0 +1,192 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/card2.png</file>
+        <file>images/card3.png</file>
+        <file>images/card4.png</file>
+        <file>images/card5.png</file>
+        <file>images/card6.png</file>
+        <file>images/card7.png</file>
+        <file>images/card8.png</file>
+        <file>images/card9.png</file>
+        <file>images/card10.png</file>
+        <file>images/card11.png</file>
+        <file>images/card12.png</file>
+        <file>images/card13.png</file>
+        <file>images/card14.png</file>
+        <file>images/card15.png</file>
+        <file>images/card16.png</file>
+        <file>images/card17.png</file>
+        <file>images/图层 9.png</file>
+        <file>images/图层 12.png</file>
+        <file>images/图层 14.png</file>
+        <file>images/图层 15.png</file>
+        <file>images/图层 16.png</file>
+        <file>images/图层 17.png</file>
+        <file>images/图层 18.png</file>
+        <file>images/图层 19.png</file>
+        <file>images/图层 20.png</file>
+        <file>images/图层 21.png</file>
+        <file>images/图层 22.png</file>
+        <file>images/图层 23.png</file>
+        <file>images/图层 24.png</file>
+        <file>images/图层 25.png</file>
+        <file>images/图层 26.png</file>
+        <file>images/图层 27.png</file>
+        <file>images/图层 28.png</file>
+        <file>images/图层 29.png</file>
+        <file>images/微信截图_20200917221053.png</file>
+        <file>images/上部棋盘.png</file>
+        <file>images/xuefan.png</file>
+        <file>images/aojing fu.png</file>
+        <file>images/captain_场上.png</file>
+        <file>images/图层 30.png</file>
+        <file>images/图层 31.png</file>
+        <file>images/图层 32.png</file>
+        <file>images/图层 33.png</file>
+        <file>images/图层 34.png</file>
+        <file>images/图层 35.png</file>
+        <file>images/图层 36.png</file>
+        <file>images/图层 38.png</file>
+        <file>images/图层 40.png</file>
+        <file>images/图层 41.png</file>
+        <file>images/图层 42.png</file>
+        <file>images/图层37.png</file>
+        <file>images/图层 39.png</file>
+        <file>images/female.png</file>
+        <file>images/male.png</file>
+        <file>images/吃武器.png</file>
+        <file>images/狗.png</file>
+        <file>images/加二加二.png</file>
+        <file>images/进化龙.png</file>
+        <file>images/狼.png</file>
+        <file>images/雷鸣.png</file>
+        <file>images/雷欧克.png</file>
+        <file>images/狮子.png</file>
+        <file>images/狮子。。。.png</file>
+        <file>images/图层 4.png</file>
+        <file>images/图层 5.png</file>
+        <file>images/图层 6.png</file>
+        <file>images/图层 7.png</file>
+        <file>images/图层 8.png</file>
+        <file>images/图层 10.png</file>
+        <file>images/图层 11.png</file>
+        <file>images/图层 13.png</file>
+        <file>images/土狼.png</file>
+        <file>images/外婆.png</file>
+        <file>images/犀牛.png</file>
+        <file>images/先锋.png</file>
+        <file>images/法力水晶.png</file>
+        <file>images/海盗蟹 随从.png</file>
+        <file>images/海盗蟹.png</file>
+        <file>images/黑熊.png</file>
+        <file>images/结束回合.png</file>
+        <file>images/猎人印记.png</file>
+        <file>images/森林狼随从.png</file>
+        <file>images/水晶槽.png</file>
+        <file>images/无光圈.png</file>
+        <file>images/追踪术.png</file>
+        <file>images/a1.png</file>
+        <file>images/a2.png</file>
+        <file>images/a3.png</file>
+        <file>images/a4.png</file>
+        <file>images/a5.png</file>
+        <file>images/a6.png</file>
+        <file>images/a7.png</file>
+        <file>images/a8.png</file>
+        <file>images/a9.png</file>
+        <file>images/a10.png</file>
+        <file>images/b1.png</file>
+        <file>images/b2.png</file>
+        <file>images/b3.png</file>
+        <file>images/b4.png</file>
+        <file>images/b5.png</file>
+        <file>images/b6.png</file>
+        <file>images/b7.png</file>
+        <file>images/b8.png</file>
+        <file>images/b9.png</file>
+        <file>images/b10.png</file>
+        <file>images/b11.png</file>
+        <file>images/b12.png</file>
+        <file>images/微信截图_20200920161131.png</file>
+        <file>images/chongfengzhu.png</file>
+        <file>images/图层 2.png</file>
+        <file>images/重斧.png</file>
+        <file>images/aojinfu.png</file>
+        <file>images/chiyanzhanfu.png</file>
+        <file>images/haidaogouzi.png</file>
+        <file>images/上层.png</file>
+        <file>images/shield_all.png</file>
+        <file>images/terr_without_shield.png</file>
+        <file>images/图层 48.png</file>
+        <file>images/shield_attack.png</file>
+        <file>images/legend.png</file>
+        <file>images/person_blood/图层 14.png</file>
+        <file>images/person_blood/图层 15.png</file>
+        <file>images/person_blood/图层 16.png</file>
+        <file>images/person_blood/图层 17.png</file>
+        <file>images/person_blood/图层 18.png</file>
+        <file>images/person_blood/图层 19.png</file>
+        <file>images/person_blood/图层 33.png</file>
+        <file>images/person_blood/图层 34.png</file>
+        <file>images/person_blood/图层 35.png</file>
+        <file>images/person_blood/图层 36.png</file>
+        <file>images/person_blood/图层 37.png</file>
+        <file>images/person_blood/图层 38.png</file>
+        <file>images/person_blood/图层 39.png</file>
+        <file>images/person_blood/图层 40.png</file>
+        <file>images/person_blood/图层 41.png</file>
+        <file>images/person_blood/图层 42.png</file>
+        <file>images/person_blood/图层 49.png</file>
+        <file>images/person_blood/图层 50.png</file>
+        <file>images/person_blood/图层 51.png</file>
+        <file>images/person_blood/图层 52.png</file>
+        <file>images/person_blood/图层 53.png</file>
+        <file>images/person_blood/图层 54.png</file>
+        <file>images/person_blood/图层 55.png</file>
+        <file>images/person_blood/图层 56.png</file>
+        <file>images/person_blood/图层 57.png</file>
+        <file>images/person_blood/图层 58.png</file>
+        <file>images/person_blood/图层 59.png</file>
+        <file>images/person_blood/图层 60.png</file>
+        <file>images/person_blood/图层 61.png</file>
+        <file>images/person_blood/30.png</file>
+        <file>images/耐久/图层 17.png</file>
+        <file>images/耐久/图层 18.png</file>
+        <file>images/耐久/图层 19.png</file>
+        <file>images/耐久/图层 20.png</file>
+        <file>images/耐久/图层 21.png</file>
+        <file>images/耐久/图层 22.png</file>
+        <file>images/耐久/图层 23.png</file>
+        <file>images/耐久/图层 24.png</file>
+        <file>images/耐久/图层 25.png</file>
+        <file>images/攻击/绿色5.png</file>
+        <file>images/攻击/图层 5.png</file>
+        <file>images/攻击/图层 6.png</file>
+        <file>images/攻击/图层 8.png</file>
+        <file>images/攻击/图层 9.png</file>
+        <file>images/攻击/图层 11.png</file>
+        <file>images/攻击/图层 12.png</file>
+        <file>images/攻击/图层 13.png</file>
+        <file>images/攻击/图层 14.png</file>
+        <file>images/攻击/图层 16.png</file>
+        <file>images/jiantou.png</file>
+        <file>images/图层 2 - 副本 - 副本 (2).png</file>
+        <file>images/图层 2 - 副本 - 副本.png</file>
+        <file>images/图层 2 - 副本.png</file>
+        <file>images/1.png</file>
+        <file>images/2.png</file>
+        <file>images/3.png</file>
+        <file>images/4.png</file>
+        <file>图层 4.png</file>
+        <file>图层 9.png</file>
+        <file>图层 12.png</file>
+        <file>图层 43.png</file>
+        <file>图层 44.png</file>
+        <file>图层2.png</file>
+        <file>图层5.png</file>
+        <file>图层6.png</file>
+        <file>`@X)UZ5IZ0B{IL{(IWY5L8E.png</file>
+        <file>微信截图_20200916160830.png</file>
+        <file>微信截图_20200916161401.png</file>
+    </qresource>
+</RCC>
